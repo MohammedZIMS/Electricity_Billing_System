@@ -37,6 +37,11 @@ class Main extends JFrame
 
         JButton calculateBillButton = new JButton("Calculate Bill");
         calculateBillButton.setBounds(70, 150, 150, 30);
+        calculateBillButton.addActionListener(e->
+        {
+            new CalculateBill();
+        }
+        );
         layeredPane.add(calculateBillButton, JLayeredPane.PALETTE_LAYER);
 
         JButton upInfoButton = new JButton("Update Information");
