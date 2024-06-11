@@ -7,17 +7,17 @@ public class DataBases {
     Statement statement;
 
     String user = "root";
-    String url = "jdbc:mysql://localhost:33060/e_billing_system";
-    String password = "1z7a1h0i5d9u0l4#7@5";
+    String url = "jdbc:mysql://localhost:3306/e_billing_system";
+    String password = "123456789";
 
     public DataBases() {
-        try {
-            // Load MySQL JDBC Driver
+        try 
+        {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            // Establish connection
             connection = DriverManager.getConnection(url, user, password);
             statement = connection.createStatement();
-        } catch (Exception e) {
+        } catch (Exception e) 
+        {
             e.printStackTrace();
         }
     }
