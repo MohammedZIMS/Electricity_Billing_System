@@ -5,18 +5,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-class SignUp extends JFrame implements ActionListener 
-{
+class SignUp extends JFrame implements ActionListener {
     JLabel CreateAs, MeterNumber, EmployerId, UserName, Name, Password;
     Choice loginAsChoice;
     JTextField MeterTextField, EmployerIdTextField, UserNameTextField, NameTextField;
     JPasswordField PasswordTextField;
     JButton create, back;
 
-    SignUp() 
-    {
-        super("Signup");
-
+    SignUp() {
         ImageIcon CreateAsIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/sign-up.png"));
         Image CreateAsImg = CreateAsIcon.getImage().getScaledInstance(120, 120, Image.SCALE_DEFAULT);
         ImageIcon CreateAsIcon1 = new ImageIcon(CreateAsImg);
@@ -59,11 +55,11 @@ class SignUp extends JFrame implements ActionListener
         add(MeterTextField);
 
         EmployerId = new JLabel("Employer Id: ");
-        EmployerId.setBounds(30, 280, 125, 20);
+        EmployerId.setBounds(30, 320, 125, 20);
         add(EmployerId);
 
         EmployerIdTextField = new JTextField();
-        EmployerIdTextField.setBounds(170, 280, 150, 20);
+        EmployerIdTextField.setBounds(170, 320, 150, 20);
         add(EmployerIdTextField);
 
         Password = new JLabel("Password: ");
@@ -81,15 +77,12 @@ class SignUp extends JFrame implements ActionListener
             @Override
             public void itemStateChanged(ItemEvent e) {
                 String user = loginAsChoice.getSelectedItem();
-                if (user.equals("Admin")) 
-                {
+                if (user.equals("Admin")) {
                     MeterNumber.setVisible(false);
                     MeterTextField.setVisible(false);
                     EmployerId.setVisible(true);
                     EmployerIdTextField.setVisible(true);
-                } 
-                else 
-                {
+                } else {
                     MeterNumber.setVisible(true);
                     MeterTextField.setVisible(true);
                     EmployerId.setVisible(false);
@@ -121,10 +114,8 @@ class SignUp extends JFrame implements ActionListener
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) 
-    {
-        if (e.getSource() == create) 
-        {
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == create) {
             String sLoginAs = loginAsChoice.getSelectedItem();
             String sName = NameTextField.getText();
             String sUserName = UserNameTextField.getText();
@@ -132,18 +123,17 @@ class SignUp extends JFrame implements ActionListener
             String sMeterNumber = MeterTextField.getText();
             String sEmployerId = EmployerIdTextField.getText();
 
-            try 
-            {
-            DataBases c = new DataBases();
-            String query = null;
-            query = "insert into Signup1 value('"+sMeterNumber+ "', '" +sUserName+"', '"+sPassword+"', '"+sName+"', '"+sLoginAs+"')";
+            try {
+                DataBases c = new DataBases();
+                String query = null;
+                query = "INSERT INTO Signup VALUES ('" + sMeterNumber + "', '" + sUserName + "', '" + sPassword + "', '" + sName + "', '" + sLoginAs + "')";
 
-            c.statement.executeUpdate(query);
+                c.statement.executeUpdate(query);
 
-            JOptionPane.showMessageDialog(null, "Account Created");
-            setVisible(false);
-            new Login();
-                              
+                JOptionPane.showMessageDialog(null, "Account Created");
+                setVisible(false);
+                new Login();
+
             } 
             catch (Exception ex) 
             {
@@ -157,7 +147,8 @@ class SignUp extends JFrame implements ActionListener
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         new SignUp();
     }
 }
