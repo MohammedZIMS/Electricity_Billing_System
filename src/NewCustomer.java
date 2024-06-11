@@ -1,14 +1,15 @@
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.*;
 
-class NewCustomer extends JFrame {
+class NewCustomer extends JFrame 
+{
     JLabel newCustomerLabel, MeterNoLabel, AddressLabel, CityLabel, StateLabel, EmailLabel, PhonNumberLabel;
     JTextField newCustomerTextField, MeterNoTextField, AddressTextField, CityTextField, StateTextField, EmailTextField, PhonNumberTextField;
     JButton CancelButton, NextButton;
 
-    NewCustomer() {
+    NewCustomer() 
+    {
         JPanel newCustomerPanel = new JPanel();
         newCustomerPanel.setBackground(new Color(252, 186, 3));
         newCustomerPanel.setLayout(null);
@@ -83,7 +84,8 @@ class NewCustomer extends JFrame {
         NextButton.setBounds(100, 400, 100, 30);
         NextButton.setBackground(Color.BLACK);
         NextButton.setForeground(Color.WHITE);
-        NextButton.addActionListener(e -> {
+        NextButton.addActionListener(e -> 
+        {
             String name = newCustomerTextField.getText();
             String meterNo = MeterNoTextField.getText();
             String address = AddressTextField.getText();
@@ -92,11 +94,21 @@ class NewCustomer extends JFrame {
             String email = EmailTextField.getText();
             String phoneNumber = PhonNumberTextField.getText();
 
+            String queryCustomer = "insert into new_Customer values('"+name+"','"+meterNo+"','"+address+"','"+city+"','"+state+"','"+email+"','"+phoneNumber+"')";
+            String querySignup = "insert into signup values('"+meterNo+"','','','"+name+"','')";
 
-            JOptionPane.showMessageDialog(this, "Customer added successfully!");
+            try{
+                DataBases c = new DataBases();
+                c.statement.executeUpdate(queryCustomer);
+                c.statement.executeUpdate(querySignup);
 
-            new Meterinfo(meterNo);
-            dispose();
+                JOptionPane.showMessageDialog(this, "Customer details added successfully");
+                JOptionPane.showMessageDialog(this, "Customer added successfully!");
+                setVisible(false);
+                new Meterinfo(meterNo);
+            }catch (Exception E){
+                E.printStackTrace();
+            }
         });
         newCustomerPanel.add(NextButton);
 
@@ -104,7 +116,8 @@ class NewCustomer extends JFrame {
         CancelButton.setBounds(240, 400, 100, 30);
         CancelButton.setBackground(Color.BLACK);
         CancelButton.setForeground(Color.WHITE);
-        CancelButton.addActionListener(e -> {
+        CancelButton.addActionListener(e -> 
+        {
             this.dispose();
         });
         newCustomerPanel.add(CancelButton);
@@ -126,7 +139,8 @@ class NewCustomer extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) 
+    {
         new NewCustomer();
     }
 }
