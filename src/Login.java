@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
 
 class Login extends JFrame implements ActionListener {
     JTextField userText;
@@ -10,8 +11,7 @@ class Login extends JFrame implements ActionListener {
 
     JButton loginButton, closeButton, signupButton;
 
-    Login() 
-    {
+    Login() {
         super("Login");
         getContentPane().setBackground(Color.WHITE);
         setLayout(null);
@@ -57,11 +57,11 @@ class Login extends JFrame implements ActionListener {
         signupButton.addActionListener(this);
         add(signupButton);
 
-        ImageIcon profile1 = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/profile1.png"));
-        Image profile2 = profile1.getImage().getScaledInstance(250, 250, Image.SCALE_DEFAULT);
+        ImageIcon profile1 = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/profile0-r.png"));
+        Image profile2 = profile1.getImage().getScaledInstance(400, 250, Image.SCALE_DEFAULT);
         ImageIcon fProfile = new ImageIcon(profile2);
         JLabel profileLabel = new JLabel(fProfile);
-        profileLabel.setBounds(10, 10, 250, 250);
+        profileLabel.setBounds(10, 10, 300, 250);
         add(profileLabel);
 
         setSize(640, 300);
@@ -74,18 +74,30 @@ class Login extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == loginButton) 
-        {
-            setVisible(false);
-            new Main(); 
-        } 
-        else if (e.getSource() == signupButton) 
-        {
+        if (e.getSource() == loginButton) {
+            String usernameString = userText.getText();
+            String passwordString = new String(passwordText.getPassword());
+            String usertypeString = loginChoice.getSelectedItem();
+
+            try {
+                DataBases c = new DataBases();
+                String query = "SELECT * FROM signup WHERE userName ='" + usernameString + "' AND password ='" + passwordString + "' AND userType ='" + usertypeString + "'";
+                ResultSet resultSet = c.statement.executeQuery(query);
+
+                if (resultSet.next()) {
+                    // String meter = resultSet.getString("meter_no");
+                    setVisible(false);
+                    new Main();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Invalid Login");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } else if (e.getSource() == signupButton) {
             setVisible(false);
             new SignUp();
-        } 
-        else if (e.getSource() == closeButton) 
-        {
+        } else if (e.getSource() == closeButton) {
             setVisible(false);
             System.exit(0);
         }
