@@ -2,7 +2,7 @@ import java.awt.*;
 import javax.swing.*;
 
 class Meterinfo extends JFrame {
-    JLabel MeterNo, meterInfoLabel, meterLocationLabel, meterTypeLabel, installationDateLabel, meterReadingLabel;
+    JLabel MeterNo, meterInfoLabel, meterLocationLabel, meterTypeLabel, installationDateLabel, billTypeLabel;
     JTextField installationDateTextField;
     Choice meterTypeChoice, billTypeChoice, meterLocationChoice;
     JButton backButton, submitButton;
@@ -54,9 +54,9 @@ class Meterinfo extends JFrame {
         installationDateTextField.setBounds(180, 180, 150, 20);
         meterInfoPanel.add(installationDateTextField);
 
-        JLabel billtyp = new JLabel("Bill Type: ");
-        billtyp.setBounds(50, 220, 100, 20);
-        meterInfoPanel.add(billtyp);
+        billTypeLabel = new JLabel("Bill Type: ");
+        billTypeLabel.setBounds(50, 220, 100, 20);
+        meterInfoPanel.add(billTypeLabel);
 
         billTypeChoice = new Choice();
         billTypeChoice.add("Normal");
@@ -69,7 +69,22 @@ class Meterinfo extends JFrame {
         submitButton.setBackground(Color.BLACK);
         submitButton.setForeground(Color.WHITE);
         submitButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Meter information submitted");
+            String meterLocationS = meterLocationChoice.getSelectedItem();
+            String meterTypeS = meterTypeChoice.getSelectedItem();
+            String installationDateS = installationDateTextField.getText();
+            String billTypeS = billTypeChoice.getSelectedItem();
+
+            String queryMeterInfo = "INSERT INTO meter_info (meter_no, meter_location, meter_type, installation_date, bill_type) VALUES ('" + meterNo + "', '" + meterLocationS + "', '" + meterTypeS + "', '" + installationDateS + "', '" + billTypeS + "')";
+
+            try {
+                DataBases c = new DataBases();
+                c.statement.executeUpdate(queryMeterInfo);
+
+                JOptionPane.showMessageDialog(this, "Meter Information Submitted Successfully");
+                setVisible(false);
+            } catch (Exception E) {
+                E.printStackTrace();
+            }
         });
         meterInfoPanel.add(submitButton);
 
