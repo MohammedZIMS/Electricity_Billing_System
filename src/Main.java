@@ -1,161 +1,205 @@
-import java.awt.*;
-import java.sql.ResultSet;
-
 import javax.swing.*;
+import java.awt.*;
 
-class CalculateBill extends JFrame 
+class Main extends JFrame 
 {
-    JLabel meterNoLabel, nameLabel, addressLabel, unitConsumedLabel, monthLabel;
-    JTextField unitConsumeTextField, nameTextField, addressTextField;
-    Choice meterNoChoice, monthChoice;
-    JButton submitButton, cancelButton;
 
-    CalculateBill() 
+    Main() 
     {
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        ImageIcon EbsIco = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/ebs0.jpg"));
+        Image EbsImg = EbsIco.getImage().getScaledInstance(1500, 830, Image.SCALE_DEFAULT);
+        ImageIcon EbsIco1 = new ImageIcon(EbsImg);
+        JLabel EbsLabel = new JLabel(EbsIco1);
+        EbsLabel.setBounds(0, 0, 1500, 830);
+
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(1500, 830));
+        layeredPane.add(EbsLabel, JLayeredPane.DEFAULT_LAYER);
+
+        JButton newCustomerButton = new JButton("New Customer");
+        newCustomerButton.setBounds(70, 100, 150, 30);
+        newCustomerButton.addActionListener(e->
+        {
+            new NewCustomer();
+        }
+        );
+        layeredPane.add(newCustomerButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton customerDetailsButton = new JButton("Customer Details");
+        customerDetailsButton.setBounds(250, 100, 150, 30);
+        layeredPane.add(customerDetailsButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton depositDetailsButton = new JButton("Deposit Details");
+        depositDetailsButton.setBounds(430, 100, 150, 30);
+        layeredPane.add(depositDetailsButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton calculateBillButton = new JButton("Calculate Bill");
+        calculateBillButton.setBounds(70, 150, 150, 30);
+        calculateBillButton.addActionListener(e->
+        {
+            new CalculateBill();
+        }
+        );
+        layeredPane.add(calculateBillButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton upInfoButton = new JButton("Update Information");
+        upInfoButton.setBounds(250, 150, 150, 30);
+        layeredPane.add(upInfoButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton viewInfoButton = new JButton("View Information");
+        viewInfoButton.setBounds(430, 150, 150, 30);
+        layeredPane.add(viewInfoButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton payBillButton = new JButton("Pay Bill");
+        payBillButton.setBounds(70, 200, 150, 30);
+        layeredPane.add(payBillButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton billDetailsButton = new JButton("Bill Details");
+        billDetailsButton.setBounds(250, 200, 150, 30);
+        layeredPane.add(billDetailsButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton generateBillButton = new JButton("Generate Bill");
+        generateBillButton.setBounds(430, 200, 150, 30);
+        layeredPane.add(generateBillButton, JLayeredPane.PALETTE_LAYER);
+
+        add(layeredPane);
+
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.X_AXIS));
+        setJMenuBar(menuBar);
+
+        menuBar.add(Box.createHorizontalGlue());
+
+        JMenu menu = new JMenu("Menu");
+        menu.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+        menuBar.add(menu);
+
+        JMenuItem newCustomer = new JMenuItem("New Customer");
+        newCustomer.setFont(new Font("Courier New", Font.PLAIN, 14));
+        ImageIcon newCustomIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/customer3-removebg-preview.png"));
+        Image newCustImg = newCustomIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        newCustomer.setIcon(new ImageIcon(newCustImg));
+        menu.add(newCustomer);
+
+        JMenuItem customerDetails = new JMenuItem("Customer Details");
+        customerDetails.setFont(new Font("monospaced", Font.PLAIN, 14));
+        ImageIcon detailsIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/customerdetails.png"));
+        Image detailsImg = detailsIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        customerDetails.setIcon(new ImageIcon(detailsImg));
+        menu.add(customerDetails);
+
+        JMenuItem depositDetails = new JMenuItem("Deposit Details");
+        depositDetails.setFont(new Font("monospaced", Font.PLAIN, 14));
+        ImageIcon depositIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/depositdetails.png"));
+        Image depositImg = depositIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        depositDetails.setIcon(new ImageIcon(depositImg));
+        menu.add(depositDetails);
+
+        JMenuItem calculateBill = new JMenuItem("Calculate Bill ");
+        calculateBill.setFont(new Font("monospaced", Font.PLAIN, 14));
+        ImageIcon calculateBillIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/calculatorbills.png"));
+        Image calculateBillImg = calculateBillIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        calculateBill.setIcon(new ImageIcon(calculateBillImg));
+        menu.add(calculateBill);
+
+        menuBar.add(Box.createHorizontalStrut(20));
+
+        JMenu info = new JMenu("Information");
+        info.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+        menuBar.add(info);
+
+        JMenuItem upInfo = new JMenuItem("Update Information");
+        upInfo.setFont(new Font("Courier New", Font.PLAIN, 14));
+        ImageIcon upInfoIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/refresh.png"));
+        Image upInfoImg = upInfoIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        upInfo.setIcon(new ImageIcon(upInfoImg));
+        info.add(upInfo);
+
+        JMenuItem viewInfo = new JMenuItem("View Information");
+        viewInfo.setFont(new Font("Courier New", Font.PLAIN, 14));
+        ImageIcon viewInfoIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/information.png"));
+        Image viewInfoImg = viewInfoIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        viewInfo.setIcon(new ImageIcon(viewInfoImg));
+        info.add(viewInfo);
+
+        menuBar.add(Box.createHorizontalStrut(20));
+
+        JMenu user = new JMenu("User");
+        user.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+        menuBar.add(user);
+
+        JMenuItem payBill = new JMenuItem("Pay Bill");
+        payBill.setFont(new Font("Courier New", Font.PLAIN, 14));
+        ImageIcon payBillIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/pay.png"));
+        Image payBillImg = payBillIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        payBill.setIcon(new ImageIcon(payBillImg));
+        user.add(payBill);
+
+        JMenuItem billDetails = new JMenuItem("Bill Details");
+        billDetails.setFont(new Font("Courier New", Font.PLAIN, 14));
+        ImageIcon billDetailsImg = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/detail.png"));
+        Image billDetailsImage = billDetailsImg.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        billDetails.setIcon(new ImageIcon(billDetailsImage));
+        user.add(billDetails);
+
+        menuBar.add(Box.createHorizontalStrut(20));
+
+        JMenu bill = new JMenu("Bill");
+        bill.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+        menuBar.add(bill);
+
+        JMenuItem genBill = new JMenuItem("Generate Bill");
+        genBill.setFont(new Font("Courier New", Font.PLAIN, 14));
+        ImageIcon genBillIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/bill.png"));
+        Image genBillImg = genBillIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        genBill.setIcon(new ImageIcon(genBillImg));
+        bill.add(genBill);
+
+        menuBar.add(Box.createHorizontalStrut(20));
+
+        JMenu utility = new JMenu("Utility");
+        utility.setFont(new Font("Times New Roman", Font.PLAIN, 16));
+        menuBar.add(utility);
+
+        JMenuItem calculator = new JMenuItem("Calculator");
+        calculator.setFont(new Font("Courier New", Font.PLAIN, 14));
+        ImageIcon calculatorIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/calculator.png"));
+        Image calculatorImg = calculatorIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        calculator.setIcon(new ImageIcon(calculatorImg));
+        utility.add(calculator);
+
+        JMenuItem notepad = new JMenuItem("Notepad");
+        notepad.setFont(new Font("monospaced", Font.PLAIN, 14));
+        ImageIcon notepadImg = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/notepad.png"));
+        Image notepadImage = notepadImg.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        notepad.setIcon(new ImageIcon(notepadImage));
+        utility.add(notepad);
+
+        menuBar.add(Box.createHorizontalStrut(20));
+
+        JMenu exit = new JMenu("Exit");
+        exit.setFont(new Font("serif", Font.PLAIN, 15));
+        menuBar.add(exit);
+
+        JMenuItem eexit = new JMenuItem("Exit");
+        eexit.setFont(new Font("monospaced", Font.PLAIN, 14));
+        ImageIcon eexitImg = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/exit.png"));
+        Image eexitImage = eexitImg.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
+        eexit.setIcon(new ImageIcon(eexitImage));
+        exit.add(eexit);
+
+        menuBar.add(Box.createHorizontalGlue());
+
         setTitle("Pariseba");
-        setSize(700, 500);
-        setLocation(600, 200);
         setResizable(false);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        JPanel calculateBillPanel = new JPanel();
-        calculateBillPanel.setLayout(null);
-        calculateBillPanel.setBackground(new Color(252, 186, 3));
-        add(calculateBillPanel);
-
-        JLabel heading = new JLabel("Calculate Electricity Bill");
-        heading.setFont(new Font("Times New Roman", Font.BOLD, 24));
-        heading.setBounds(70, 10, 300, 30);
-        calculateBillPanel.add(heading);
-
-        meterNoLabel = new JLabel("Meter No:");
-        meterNoLabel.setBounds(50, 60, 100, 20);
-        calculateBillPanel.add(meterNoLabel);
-
-        meterNoChoice = new Choice();
-        meterNoChoice.setBounds(180, 60, 150, 20);
-        try 
-        {
-            DataBases c = new DataBases();
-            ResultSet resultSet = c.statement.executeQuery("select * from new_customer");
-            while (resultSet.next())
-            {
-                meterNoChoice.add(resultSet.getString("meter_no"));
-            }
-        }
-        catch (Exception E)
-        {
-            E.printStackTrace();
-        }
-        calculateBillPanel.add(meterNoChoice);
-
-        nameLabel = new JLabel("Name:");
-        nameLabel.setBounds(50, 100, 100, 20);
-        calculateBillPanel.add(nameLabel);
-
-        nameTextField = new JTextField("");
-        nameTextField.setBounds(180, 100, 150, 20);
-        calculateBillPanel.add(nameTextField);
-
-        addressLabel = new JLabel("Address:");
-        addressLabel.setBounds(50, 140, 100, 20);
-        calculateBillPanel.add(addressLabel);
-
-        addressTextField = new JTextField("");
-        addressTextField.setBounds(180, 140, 150, 20);
-        calculateBillPanel.add(addressTextField);
-
-        unitConsumedLabel = new JLabel("Unit Consumed:");
-        unitConsumedLabel.setBounds(50, 180, 100, 20);
-        calculateBillPanel.add(unitConsumedLabel);
-
-        unitConsumeTextField = new JTextField();
-        unitConsumeTextField.setBounds(180, 180, 150, 20);
-        calculateBillPanel.add(unitConsumeTextField);
-
-        monthLabel = new JLabel("Month:");
-        monthLabel.setBounds(50, 220, 100, 20);
-        calculateBillPanel.add(monthLabel);
-
-        monthChoice = new Choice();
-        monthChoice.setBounds(180, 220, 150, 20);
-        monthChoice.add("January");
-        monthChoice.add("February");
-        monthChoice.add("March");
-        monthChoice.add("April");
-        monthChoice.add("May");
-        monthChoice.add("June");
-        monthChoice.add("July");
-        monthChoice.add("August");
-        monthChoice.add("September");
-        monthChoice.add("October");
-        monthChoice.add("November");
-        monthChoice.add("December");
-        calculateBillPanel.add(monthChoice);
-
-        submitButton = new JButton("Submit");
-        submitButton.setBounds(100, 280, 100, 30);
-        submitButton.setBackground(Color.BLACK);
-        submitButton.setForeground(Color.WHITE);
-        submitButton.addActionListener(e -> handleSubmit());
-        calculateBillPanel.add(submitButton);
-
-        cancelButton = new JButton("Cancel");
-        cancelButton.setBounds(220, 280, 100, 30);
-        cancelButton.setBackground(Color.BLACK);
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.addActionListener(e -> handleCancel());
-        calculateBillPanel.add(cancelButton);
-
-        add(calculateBillPanel, BorderLayout.CENTER);
-
-        JLabel calculateBillImageLabel = new JLabel(createImageIcon("ImagePariseba/bill3.jpg", 230, 200));
-        calculateBillImageLabel.setBounds(400, 80, 230, 200);
-        calculateBillImageLabel.setOpaque(true);
-        calculateBillImageLabel.setBackground(Color.WHITE);
-        add(calculateBillImageLabel, BorderLayout.EAST);
-
         setVisible(true);
-    }
-
-    private ImageIcon createImageIcon(String path, int width, int height) 
-    {
-        ImageIcon icon = new ImageIcon(ClassLoader.getSystemResource(path));
-        Image image = icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT);
-        return new ImageIcon(image);
-    }
-
-    private void handleSubmit() 
-    {
-        String meterNo = meterNoChoice.getSelectedItem();
-        String name = nameTextField.getText();
-        String address = addressTextField.getText();
-        String unitConsumed = unitConsumeTextField.getText();
-        String month = monthChoice.getSelectedItem();
-
-        String query = String.format("INSERT INTO bill (meter_no, name, address, unit_consumed, month) VALUES ('%s', '%s', '%s', '%s', '%s')",
-                meterNo, name, address, unitConsumed, month);
-
-        try 
-        {
-            DataBases db = new DataBases();
-            db.statement.executeUpdate(query);
-
-            JOptionPane.showMessageDialog(this, "Bill calculated and recorded successfully!");
-        } 
-        catch (Exception e) 
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleCancel() 
-    {
-        dispose();
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public static void main(String[] args) 
     {
-        new CalculateBill();
+        new Main();
     }
 }
