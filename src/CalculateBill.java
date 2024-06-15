@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.sql.ResultSet;
+
 import javax.swing.*;
 
 class CalculateBill extends JFrame 
@@ -32,15 +34,26 @@ class CalculateBill extends JFrame
 
         meterNoChoice = new Choice();
         meterNoChoice.setBounds(180, 60, 150, 20);
-        meterNoChoice.add("1001"); 
-        meterNoChoice.add("1002");
+        try 
+        {
+            DataBases c = new DataBases();
+            ResultSet resultSet = c.statement.executeQuery("select * from new_customer");
+            while (resultSet.next())
+            {
+                meterNoChoice.add(resultSet.getString("meter_no"));
+            }
+        }
+        catch (Exception E)
+        {
+            E.printStackTrace();
+        }
         calculateBillPanel.add(meterNoChoice);
 
         nameLabel = new JLabel("Name:");
         nameLabel.setBounds(50, 100, 100, 20);
         calculateBillPanel.add(nameLabel);
 
-        nameTextField = new JTextField();
+        nameTextField = new JTextField("");
         nameTextField.setBounds(180, 100, 150, 20);
         calculateBillPanel.add(nameTextField);
 
@@ -48,7 +61,7 @@ class CalculateBill extends JFrame
         addressLabel.setBounds(50, 140, 100, 20);
         calculateBillPanel.add(addressLabel);
 
-        addressTextField = new JTextField();
+        addressTextField = new JTextField("");
         addressTextField.setBounds(180, 140, 150, 20);
         calculateBillPanel.add(addressTextField);
 
