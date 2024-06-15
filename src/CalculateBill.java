@@ -1,17 +1,18 @@
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.sql.ResultSet;
 
-import javax.swing.*;
-
-class CalculateBill extends JFrame 
+public class CalculateBill extends JFrame implements ActionListener 
 {
-    JLabel meterNoLabel, nameLabel, addressLabel, unitConsumedLabel, monthLabel;
-    JTextField unitConsumeTextField, nameTextField, addressTextField;
+    JLabel meterNoLabel, nameLabel, nameText, addressLabel, addressText, unitConsumedLabel, monthLabel;
+    JTextField unitConsumeTextField;
     Choice meterNoChoice, monthChoice;
     JButton submitButton, cancelButton;
 
-    CalculateBill() 
-    {
+    CalculateBill() {
         setTitle("Pariseba");
         setSize(700, 500);
         setLocation(600, 200);
@@ -34,53 +35,34 @@ class CalculateBill extends JFrame
 
         meterNoChoice = new Choice();
         meterNoChoice.setBounds(180, 60, 150, 20);
-        try 
-        {
-            DataBases c = new DataBases();
-            ResultSet resultSet = c.statement.executeQuery("select * from new_customer");
-            while (resultSet.next())
-            {
-                meterNoChoice.add(resultSet.getString("meter_no"));
-            }
-        }
-        catch (Exception E)
-        {
-            E.printStackTrace();
-        }
+        populateMeterNoChoice();  // Populate meter number choice from database
         calculateBillPanel.add(meterNoChoice);
 
-        nameLabel = new JLabel("Name:");
+        JLabel nameLabel = new JLabel("Name:");
         nameLabel.setBounds(50, 100, 100, 20);
         calculateBillPanel.add(nameLabel);
 
-        nameTextField = new JTextField("");
-        nameTextField.setBounds(180, 100, 150, 20);
-        calculateBillPanel.add(nameTextField);
+        nameText = new JLabel("");
+        nameText.setBounds(180, 100, 150, 20);
+        calculateBillPanel.add(nameText);
 
         addressLabel = new JLabel("Address:");
         addressLabel.setBounds(50, 140, 100, 20);
         calculateBillPanel.add(addressLabel);
 
-        addressTextField = new JTextField("");
-        addressTextField.setBounds(180, 140, 150, 20);
-        calculateBillPanel.add(addressTextField);
+        addressText = new JLabel("");
+        addressText.setBounds(180, 140, 150, 20);
+        calculateBillPanel.add(addressText);
 
-        try 
+        meterNoChoice.addItemListener(e -> 
         {
-            DataBases c= new DataBases();
-            ResultSet resultSet = c.statement.executeQuery("select * from new_customer where meter_no = '"+meterNoChoice.getSelectedItem()+"' ");
-            while (resultSet.next())
-            {
-                nameTextField.setText(resultSet.getString("name"));
-                addressTextField.setText(resultSet.getString("address"));
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                String selectedMeterNo = meterNoChoice.getSelectedItem();
+                fetchCustomerDetails(selectedMeterNo);  // Fetch customer details based on meter number
             }
-        }
-        catch (Exception E)
-        {
-            E.printStackTrace();
-        }
+        });
 
-        unitConsumedLabel = new JLabel("Unit Consumed:");
+        JLabel unitConsumedLabel = new JLabel("Unit Consumed:");
         unitConsumedLabel.setBounds(50, 180, 100, 20);
         calculateBillPanel.add(unitConsumedLabel);
 
@@ -88,56 +70,129 @@ class CalculateBill extends JFrame
         unitConsumeTextField.setBounds(180, 180, 150, 20);
         calculateBillPanel.add(unitConsumeTextField);
 
-        monthLabel = new JLabel("Month:");
+        JLabel monthLabel = new JLabel("Month:");
         monthLabel.setBounds(50, 220, 100, 20);
         calculateBillPanel.add(monthLabel);
 
         monthChoice = new Choice();
         monthChoice.setBounds(180, 220, 150, 20);
-        monthChoice.add("January");
-        monthChoice.add("February");
-        monthChoice.add("March");
-        monthChoice.add("April");
-        monthChoice.add("May");
-        monthChoice.add("June");
-        monthChoice.add("July");
-        monthChoice.add("August");
-        monthChoice.add("September");
-        monthChoice.add("October");
-        monthChoice.add("November");
-        monthChoice.add("December");
+        addMonthsToChoice();  // Add months to choice
         calculateBillPanel.add(monthChoice);
 
         submitButton = new JButton("Submit");
         submitButton.setBounds(100, 280, 100, 30);
         submitButton.setBackground(Color.BLACK);
         submitButton.setForeground(Color.WHITE);
-        //submitButton.addActionListener();
+        submitButton.addActionListener(this);  // Set action listener for submit button
         calculateBillPanel.add(submitButton);
 
         cancelButton = new JButton("Cancel");
         cancelButton.setBounds(220, 280, 100, 30);
         cancelButton.setBackground(Color.BLACK);
         cancelButton.setForeground(Color.WHITE);
-        //cancelButton.addActionListener();
+        cancelButton.addActionListener(this);  // Set action listener for cancel button
         calculateBillPanel.add(cancelButton);
 
+        setLayout(new BorderLayout());
         add(calculateBillPanel, BorderLayout.CENTER);
 
-        setLayout(new BorderLayout());
-        add(calculateBillPanel,"Center");
+        // Image panel on the right side
         ImageIcon imageIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/bill3.jpg"));
-        Image image = imageIcon.getImage().getScaledInstance(250,200,Image.SCALE_DEFAULT);
-        ImageIcon imageIcon1 = new ImageIcon(image);
-        JLabel imageLabel = new JLabel(imageIcon1);
-        add(imageLabel,"East");
+        Image image = imageIcon.getImage().getScaledInstance(250, 300, Image.SCALE_DEFAULT);
+        ImageIcon scaledImageIcon = new ImageIcon(image);
+        JLabel imageLabel = new JLabel(scaledImageIcon);
+        imageLabel.setBounds(400, 50, 250, 300);  // Adjusted position and size
+        calculateBillPanel.add(imageLabel);
 
         setVisible(true);
     }
 
+    private void populateMeterNoChoice() {
+        try {
+            DataBases c = new DataBases();
+            ResultSet resultSet = c.statement.executeQuery("SELECT * FROM new_customer");
+            while (resultSet.next()) {
+                meterNoChoice.add(resultSet.getString("meter_no"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-    public static void main(String[] args) 
-    {
+    private void fetchCustomerDetails(String meterNo) {
+        try {
+            DataBases c = new DataBases();
+            ResultSet resultSet = c.statement.executeQuery("SELECT * FROM new_customer WHERE meter_no = '" + meterNo + "'");
+            if (resultSet.next()) {
+                nameText.setText(resultSet.getString("name"));
+                addressText.setText(resultSet.getString("address"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addMonthsToChoice() {
+        String[] months = {"January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"};
+        for (String month : months) {
+            monthChoice.add(month);
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == submitButton) {
+            String meterNo = meterNoChoice.getSelectedItem();
+            String name = nameText.getText();
+            String address = addressText.getText();
+            String unitConsumed = unitConsumeTextField.getText();
+            String month = monthChoice.getSelectedItem();
+
+            // Calculate total bill here (similar to your other code)
+
+            // Example calculation (replace with your logic)
+            int totalBill = calculateTotalBill(Integer.parseInt(unitConsumed));
+
+            // Example insertion query (replace with your database logic)
+            String query = String.format("INSERT INTO bill (meter_no, name, address, unit_consumed, month, total_bill) VALUES ('%s', '%s', '%s', '%s', '%s', '%d')",
+                    meterNo, name, address, unitConsumed, month, totalBill);
+
+            try {
+                DataBases db = new DataBases();
+                db.statement.executeUpdate(query);
+
+                JOptionPane.showMessageDialog(this, "Bill calculated and recorded successfully!");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } else if (e.getSource() == cancelButton) {
+            dispose();  // Close the frame
+        }
+    }
+
+    private int calculateTotalBill(int unitsConsumed) {
+        // Replace with your calculation logic (fetching rates from database and calculating)
+        int totalBill = 0;
+        try {
+            DataBases c = new DataBases();
+            ResultSet resultSet = c.statement.executeQuery("SELECT * FROM rates");
+            if (resultSet.next()) {
+                int costPerUnit = Integer.parseInt(resultSet.getString("cost_per_unit"));
+                int meterRent = Integer.parseInt(resultSet.getString("meter_rent"));
+                int serviceCharge = Integer.parseInt(resultSet.getString("service_charge"));
+                int swachhBharat = Integer.parseInt(resultSet.getString("swachh_bharat"));
+                int fixedTax = Integer.parseInt(resultSet.getString("fixed_tax"));
+
+                totalBill = unitsConsumed * costPerUnit + meterRent + serviceCharge + swachhBharat + fixedTax;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return totalBill;
+    }
+
+    public static void main(String[] args) {
         new CalculateBill();
     }
 }
