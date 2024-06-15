@@ -65,6 +65,21 @@ class CalculateBill extends JFrame
         addressTextField.setBounds(180, 140, 150, 20);
         calculateBillPanel.add(addressTextField);
 
+        try 
+        {
+            DataBases c= new DataBases();
+            ResultSet resultSet = c.statement.executeQuery("select * from new_customer where meter_no = '"+meterNoChoice.getSelectedItem()+"' ");
+            while (resultSet.next())
+            {
+                nameTextField.setText(resultSet.getString("name"));
+                addressTextField.setText(resultSet.getString("address"));
+            }
+        }
+        catch (Exception E)
+        {
+            E.printStackTrace();
+        }
+
         unitConsumedLabel = new JLabel("Unit Consumed:");
         unitConsumedLabel.setBounds(50, 180, 100, 20);
         calculateBillPanel.add(unitConsumedLabel);
