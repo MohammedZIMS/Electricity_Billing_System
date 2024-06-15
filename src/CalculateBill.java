@@ -112,62 +112,29 @@ class CalculateBill extends JFrame
         submitButton.setBounds(100, 280, 100, 30);
         submitButton.setBackground(Color.BLACK);
         submitButton.setForeground(Color.WHITE);
-        submitButton.addActionListener(e -> handleSubmit());
+        //submitButton.addActionListener();
         calculateBillPanel.add(submitButton);
 
         cancelButton = new JButton("Cancel");
         cancelButton.setBounds(220, 280, 100, 30);
         cancelButton.setBackground(Color.BLACK);
         cancelButton.setForeground(Color.WHITE);
-        cancelButton.addActionListener(e -> handleCancel());
+        //cancelButton.addActionListener();
         calculateBillPanel.add(cancelButton);
 
         add(calculateBillPanel, BorderLayout.CENTER);
 
-        JLabel calculateBillImageLabel = new JLabel(createImageIcon("ImagePariseba/bill3.jpg", 230, 200));
-        calculateBillImageLabel.setBounds(400, 80, 230, 200);
-        calculateBillImageLabel.setOpaque(true);
-        calculateBillImageLabel.setBackground(Color.WHITE);
-        add(calculateBillImageLabel, BorderLayout.EAST);
+        setLayout(new BorderLayout());
+        add(calculateBillPanel,"Center");
+        ImageIcon imageIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/bill3.jpg"));
+        Image image = imageIcon.getImage().getScaledInstance(250,200,Image.SCALE_DEFAULT);
+        ImageIcon imageIcon1 = new ImageIcon(image);
+        JLabel imageLabel = new JLabel(imageIcon1);
+        add(imageLabel,"East");
 
         setVisible(true);
     }
 
-    private ImageIcon createImageIcon(String path, int width, int height) 
-    {
-        ImageIcon icon = new ImageIcon(ClassLoader.getSystemResource(path));
-        Image image = icon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT);
-        return new ImageIcon(image);
-    }
-
-    private void handleSubmit() 
-    {
-        String meterNo = meterNoChoice.getSelectedItem();
-        String name = nameTextField.getText();
-        String address = addressTextField.getText();
-        String unitConsumed = unitConsumeTextField.getText();
-        String month = monthChoice.getSelectedItem();
-
-        String query = String.format("INSERT INTO bill (meter_no, name, address, unit_consumed, month) VALUES ('%s', '%s', '%s', '%s', '%s')",
-                meterNo, name, address, unitConsumed, month);
-
-        try 
-        {
-            DataBases db = new DataBases();
-            db.statement.executeUpdate(query);
-
-            JOptionPane.showMessageDialog(this, "Bill calculated and recorded successfully!");
-        } 
-        catch (Exception e) 
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private void handleCancel() 
-    {
-        dispose();
-    }
 
     public static void main(String[] args) 
     {
