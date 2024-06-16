@@ -19,6 +19,7 @@ public class CustomerDetails extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel searchPanel = new JPanel();
+        searchPanel.setBackground(new Color(144,238,144));
         searchPanel.setLayout(new GridLayout(4, 2, 10, 10));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(searchPanel, BorderLayout.NORTH);
@@ -51,7 +52,7 @@ public class CustomerDetails extends JFrame implements ActionListener {
         SHCleanButton = new JButton("Search History Clean");
         SHCleanButton.addActionListener(e ->
         {
-            new CustomerDetails();
+            tableModel.setRowCount(0);
         }
         );
         searchPanel.add(SHCleanButton);
