@@ -3,12 +3,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.sql.ResultSet;
 
-public class CalculateBill extends JFrame implements ActionListener 
-{
-    JLabel meterNoLabel, nameLabel, addressLabel, unitConsumedLabel, monthLabel;
-    JTextField unitConsumeTextField, nameTextField, addressTextField;
+public class CalculateBill extends JFrame implements ActionListener {
+    JLabel meterNoLabel, nameLabel, nameText, addressLabel, addressText, unitConsumedLabel, monthLabel;
+    JTextField unitConsumeTextField;
     Choice meterNoChoice, monthChoice;
     JButton submitButton, cancelButton;
 
@@ -34,37 +34,38 @@ public class CalculateBill extends JFrame implements ActionListener
         calculateBillPanel.add(meterNoLabel);
 
         meterNoChoice = new Choice();
+        populateMeterNoChoice();
         meterNoChoice.setBounds(180, 60, 150, 20);
-        populateMeterNoChoice();  // Populate meter number choice from database
         calculateBillPanel.add(meterNoChoice);
 
-        JLabel nameLabel = new JLabel("Name:");
+        nameLabel = new JLabel("Name:");
         nameLabel.setBounds(50, 100, 100, 20);
         calculateBillPanel.add(nameLabel);
 
-        nameTextField = new JTextField();
-        nameTextField.setBounds(180, 100, 150, 20);
-        nameTextField.setEditable(false);
-        calculateBillPanel.add(nameTextField);
+        nameText = new JLabel("");
+        nameText.setBounds(180, 100, 150, 20);
+        calculateBillPanel.add(nameText);
 
         addressLabel = new JLabel("Address:");
         addressLabel.setBounds(50, 140, 100, 20);
         calculateBillPanel.add(addressLabel);
 
-        addressTextField = new JTextField();
-        addressTextField.setBounds(180, 140, 150, 20);
-        addressTextField.setEditable(false);
-        calculateBillPanel.add(addressTextField);
+        addressText = new JLabel("");
+        addressText.setBounds(180, 140, 150, 20);
+        calculateBillPanel.add(addressText);
 
-        meterNoChoice.addItemListener(e -> 
-        {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                String selectedMeterNo = meterNoChoice.getSelectedItem();
-                fetchCustomerDetails(selectedMeterNo);  // Fetch customer details based on meter number
+        fetchCustomerDetails(meterNoChoice.getSelectedItem()); // Initial population of details
+
+        meterNoChoice.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    fetchCustomerDetails(meterNoChoice.getSelectedItem());
+                }
             }
         });
 
-        JLabel unitConsumedLabel = new JLabel("Unit Consumed:");
+        unitConsumedLabel = new JLabel("Unit Consumed:");
         unitConsumedLabel.setBounds(50, 180, 100, 20);
         calculateBillPanel.add(unitConsumedLabel);
 
@@ -72,13 +73,13 @@ public class CalculateBill extends JFrame implements ActionListener
         unitConsumeTextField.setBounds(180, 180, 150, 20);
         calculateBillPanel.add(unitConsumeTextField);
 
-        JLabel monthLabel = new JLabel("Month:");
+        monthLabel = new JLabel("Month:");
         monthLabel.setBounds(50, 220, 100, 20);
         calculateBillPanel.add(monthLabel);
 
         monthChoice = new Choice();
         monthChoice.setBounds(180, 220, 150, 20);
-        addMonthsToChoice();  
+        addMonthsToChoice();
         calculateBillPanel.add(monthChoice);
 
         submitButton = new JButton("Submit");
@@ -92,7 +93,7 @@ public class CalculateBill extends JFrame implements ActionListener
         cancelButton.setBounds(220, 280, 100, 30);
         cancelButton.setBackground(Color.BLACK);
         cancelButton.setForeground(Color.WHITE);
-        cancelButton.addActionListener(this);  
+        cancelButton.addActionListener(this);
         calculateBillPanel.add(cancelButton);
 
         setLayout(new BorderLayout());
@@ -115,9 +116,9 @@ public class CalculateBill extends JFrame implements ActionListener
     private void populateMeterNoChoice() {
         try {
             DataBases c = new DataBases();
-            ResultSet resultSet = c.statement.executeQuery("SELECT * FROM new_customer");
+            ResultSet resultSet = c.statement.executeQuery("SELECT * FROM new_Customer");
             while (resultSet.next()) {
-                meterNoChoice.add(resultSet.getString("meter_no"));
+                meterNoChoice.add(resultSet.getString("meterNo"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,10 +128,10 @@ public class CalculateBill extends JFrame implements ActionListener
     private void fetchCustomerDetails(String meterNo) {
         try {
             DataBases c = new DataBases();
-            ResultSet resultSet = c.statement.executeQuery("SELECT * FROM new_customer WHERE meter_no = '" + meterNo + "'");
+            ResultSet resultSet = c.statement.executeQuery("SELECT * FROM new_Customer WHERE meterNo = '" + meterNo + "'");
             if (resultSet.next()) {
-                nameTextField.setText(resultSet.getString("name"));
-                addressTextField.setText(resultSet.getString("address"));
+                nameText.setText(resultSet.getString("name"));
+                addressText.setText(resultSet.getString("address"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,29 +150,21 @@ public class CalculateBill extends JFrame implements ActionListener
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == submitButton) {
             String meterNo = meterNoChoice.getSelectedItem();
-            String name = nameTextField.getText();
-            String address = addressTextField.getText();
+            String name = nameText.getText();
+            String address = addressText.getText();
             String unitConsumed = unitConsumeTextField.getText();
             String month = monthChoice.getSelectedItem();
 
-            // Calculate total bill here (similar to your other code)
-
-            // Example calculation (replace with your logic)
             int totalBill = calculateTotalBill(Integer.parseInt(unitConsumed));
 
-            // Example insertion query (replace with your database logic)
-            String query = String.format("INSERT INTO bill (meter_no, name, address, unit_consumed, month, total_bill) VALUES ('%s', '%s', '%s', '%s', '%s', '%d')",
-                    meterNo, name, address, unitConsumed, month, totalBill);
+            String query = String.format("INSERT INTO bill (meter_no, name, address, unit_consumed, month, total_bill, status) VALUES ('%s', '%s', '%s', '%s', '%s', '%d', 'Unpaid')", meterNo, name, address, unitConsumed, month, totalBill);
 
-            try 
-            {
+            try {
                 DataBases db = new DataBases();
                 db.statement.executeUpdate(query);
 
                 JOptionPane.showMessageDialog(this, "Bill calculated and recorded successfully!");
-            } 
-            catch (Exception ex) 
-            {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         } else if (e.getSource() == cancelButton) {
@@ -181,23 +174,18 @@ public class CalculateBill extends JFrame implements ActionListener
 
     private int calculateTotalBill(int unitsConsumed) {
         int totalBill = 0;
-        try 
-        {
+        try {
             DataBases c = new DataBases();
             ResultSet resultSet = c.statement.executeQuery("SELECT * FROM rates");
-            if (resultSet.next()) 
-            {
+            if (resultSet.next()) {
                 int costPerUnit = Integer.parseInt(resultSet.getString("cost_per_unit"));
                 int meterRent = Integer.parseInt(resultSet.getString("meter_rent"));
                 int serviceCharge = Integer.parseInt(resultSet.getString("service_charge"));
-                int swachhBharat = Integer.parseInt(resultSet.getString("swachh_bharat"));
                 int fixedTax = Integer.parseInt(resultSet.getString("fixed_tax"));
 
-                totalBill = unitsConsumed * costPerUnit + meterRent + serviceCharge + swachhBharat + fixedTax;
+                totalBill = unitsConsumed * costPerUnit + meterRent + serviceCharge + fixedTax;
             }
-        } 
-        catch (Exception e) 
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return totalBill;
