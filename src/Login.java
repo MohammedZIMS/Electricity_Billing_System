@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 class Login extends JFrame implements ActionListener {
@@ -80,16 +81,20 @@ class Login extends JFrame implements ActionListener {
             String usertypeString = loginChoice.getSelectedItem();
 
             try {
-                DataBases c = new DataBases();
-                String query = "SELECT * FROM signup WHERE userName ='" + usernameString + "' AND password ='" + passwordString + "' AND userType ='" + usertypeString + "'";
-                ResultSet resultSet = c.statement.executeQuery(query);
+                DataBases db = new DataBases();
+                String query = "SELECT * FROM Signup WHERE userName = ? AND password = ? AND userType = ?";
+                PreparedStatement pstmt = db.connection.prepareStatement(query);
+                pstmt.setString(1, usernameString);
+                pstmt.setString(2, passwordString);
+                pstmt.setString(3, usertypeString);
 
-                if (resultSet.next()) {
-                    // String meter = resultSet.getString("meter_no");
+                ResultSet rs = pstmt.executeQuery();
+                if (rs.next()) {
                     setVisible(false);
-                    new Main();
+                    String meterNumber = rs.getString("meterNumber");
+                    new Main(usertypeString, meterNumber);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Invalid Login");
+                    JOptionPane.showMessageDialog(null, "Invalid login credentials", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -97,14 +102,10 @@ class Login extends JFrame implements ActionListener {
         } else if (e.getSource() == signupButton) {
             setVisible(false);
             new SignUp();
-        } else if (e.getSource() == closeButton) {
-            setVisible(false);
-            System.exit(0);
         }
     }
 
-    public static void main(String[] args) 
-    {
+    public static void main(String[] args) {
         new Login();
     }
 }
