@@ -1,15 +1,13 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
+import java.sql.ResultSet;
 
 class SignUp extends JFrame implements ActionListener {
-    JLabel CreateAs, MeterNumber, EmployerId, UserName, Name, Password;
+    JLabel CreateAs, MeterNumber, EmployerId, UserName, Name, Password, confirmPasswordJLabel;
     Choice loginAsChoice;
     JTextField MeterTextField, EmployerIdTextField, UserNameTextField, NameTextField;
-    JPasswordField PasswordTextField;
+    JPasswordField PasswordTextField, confirmPasswordJTField;
     JButton create, back;
 
     SignUp() {
@@ -30,45 +28,75 @@ class SignUp extends JFrame implements ActionListener {
         loginAsChoice.setBounds(170, 160, 150, 20);
         add(loginAsChoice);
 
-        Name = new JLabel("Name: ");
-        Name.setBounds(30, 200, 125, 20);
-        add(Name);
-
-        NameTextField = new JTextField();
-        NameTextField.setBounds(170, 200, 150, 20);
-        add(NameTextField);
-
-        UserName = new JLabel("Username: ");
-        UserName.setBounds(30, 240, 125, 20);
-        add(UserName);
-
-        UserNameTextField = new JTextField();
-        UserNameTextField.setBounds(170, 240, 150, 20);
-        add(UserNameTextField);
-
-        MeterNumber = new JLabel("Meter Number: ");
-        MeterNumber.setBounds(30, 280, 125, 20);
-        add(MeterNumber);
-
-        MeterTextField = new JTextField();
-        MeterTextField.setBounds(170, 280, 150, 20);
-        add(MeterTextField);
-
         EmployerId = new JLabel("Employer Id: ");
-        EmployerId.setBounds(30, 320, 125, 20);
+        EmployerId.setBounds(30, 200, 125, 20);
         add(EmployerId);
 
         EmployerIdTextField = new JTextField();
-        EmployerIdTextField.setBounds(170, 320, 150, 20);
+        EmployerIdTextField.setBounds(170, 200, 150, 20);
         add(EmployerIdTextField);
 
+        MeterNumber = new JLabel("Meter Number: ");
+        MeterNumber.setBounds(30, 200, 125, 20);
+        add(MeterNumber);
+
+        MeterTextField = new JTextField();
+        MeterTextField.setBounds(170, 200, 150, 20);
+        add(MeterTextField);
+
+        Name = new JLabel("Name: ");
+        Name.setBounds(30, 240, 125, 20);
+        add(Name);
+
+        NameTextField = new JTextField();
+        NameTextField.setBounds(170, 240, 150, 20);
+        add(NameTextField);
+
+        MeterTextField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                try {
+                    DataBases c = new DataBases();
+                    ResultSet resultSet = c.statement.executeQuery("SELECT name FROM new_Customer WHERE meterNo = '" + MeterTextField.getText() + "'");
+                    if (resultSet.next()) {
+                        NameTextField.setText(resultSet.getString("name"));
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Meter number not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        UserName = new JLabel("Username: ");
+        UserName.setBounds(30, 280, 125, 20);
+        add(UserName);
+
+        UserNameTextField = new JTextField();
+        UserNameTextField.setBounds(170, 280, 150, 20);
+        add(UserNameTextField);
+
         Password = new JLabel("Password: ");
-        Password.setBounds(30, 360, 125, 20);
+        Password.setBounds(30, 320, 125, 20);
         add(Password);
 
         PasswordTextField = new JPasswordField();
-        PasswordTextField.setBounds(170, 360, 150, 20);
+        PasswordTextField.setBounds(170, 320, 150, 20);
         add(PasswordTextField);
+
+        confirmPasswordJLabel = new JLabel("Confirm Password: ");
+        confirmPasswordJLabel.setBounds(30, 360, 125, 20);
+        add(confirmPasswordJLabel);
+
+        confirmPasswordJTField = new JPasswordField();
+        confirmPasswordJTField.setBounds(170, 360, 150, 20);
+        add(confirmPasswordJTField);
 
         EmployerId.setVisible(false);
         EmployerIdTextField.setVisible(false);
@@ -80,11 +108,13 @@ class SignUp extends JFrame implements ActionListener {
                 if (user.equals("Admin")) {
                     MeterNumber.setVisible(false);
                     MeterTextField.setVisible(false);
+                    NameTextField.setEditable(false);
                     EmployerId.setVisible(true);
                     EmployerIdTextField.setVisible(true);
                 } else {
                     MeterNumber.setVisible(true);
                     MeterTextField.setVisible(true);
+                    NameTextField.setEditable(false);
                     EmployerId.setVisible(false);
                     EmployerIdTextField.setVisible(false);
                 }
@@ -107,7 +137,7 @@ class SignUp extends JFrame implements ActionListener {
         setSize(400, 500);
         setResizable(false);
         setLocation(500, 180);
-        setTitle("Sign Up");
+        setTitle("Signup");
         setLayout(null);
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -120,35 +150,37 @@ class SignUp extends JFrame implements ActionListener {
             String sName = NameTextField.getText();
             String sUserName = UserNameTextField.getText();
             String sPassword = new String(PasswordTextField.getPassword());
+            String sConfirmPassword = new String(confirmPasswordJTField.getPassword());
             String sMeterNumber = MeterTextField.getText();
             String sEmployerId = EmployerIdTextField.getText();
 
+            if (!sPassword.equals(sConfirmPassword)) {
+                JOptionPane.showMessageDialog(null, "Password and Confirm Password do not match", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             try {
                 DataBases c = new DataBases();
-                String query = null;
-                query = "INSERT INTO Signup VALUES ('" + sMeterNumber + "', '" + sUserName + "', '" + sPassword + "', '" + sName + "', '" + sLoginAs + "')";
-
+                String query;
+                if (sLoginAs.equals("Customer")) {
+                    query = "INSERT INTO Signup VALUES ('" + sMeterNumber + "', '" + sUserName + "', '" + sPassword + "', '" + sName + "', '" + sLoginAs + "')";
+                } else {
+                    query = "update Signup set username = '"+sUserName+"', password = '"+sPassword+"', usertype = '"+sLoginAs+"' where meter_no = '"+sMeterNumber+"'";
+                }
                 c.statement.executeUpdate(query);
-
                 JOptionPane.showMessageDialog(null, "Account Created");
                 setVisible(false);
                 new Login();
-
-            } 
-            catch (Exception ex) 
-            {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
-        } 
-        else if (e.getSource() == back) 
-        {
+        } else if (e.getSource() == back) {
             setVisible(false);
             new Login();
         }
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         new SignUp();
     }
 }
