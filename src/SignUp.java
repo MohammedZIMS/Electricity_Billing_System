@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 class SignUp extends JFrame implements ActionListener {
     JLabel CreateAs, MeterNumber, EmployerId, UserName, Name, Password, confirmPasswordJLabel;
@@ -52,21 +53,38 @@ class SignUp extends JFrame implements ActionListener {
         NameTextField.setBounds(170, 240, 150, 20);
         add(NameTextField);
 
-        MeterTextField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                
-            }
-
+        MeterTextField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 try {
                     DataBases c = new DataBases();
-                    ResultSet resultSet = c.statement.executeQuery("SELECT name FROM new_Customer WHERE meterNo = '" + MeterTextField.getText() + "'");
+                    String user = loginAsChoice.getSelectedItem();
+                    ResultSet resultSet;
+                    if (user.equals("Customer")) {
+                        resultSet = c.statement.executeQuery("SELECT name FROM new_Customer WHERE meterNo = '" + MeterTextField.getText() + "'");
+                        if (resultSet.next()) {
+                            NameTextField.setText(resultSet.getString("name"));
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Meter number not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        EmployerIdTextField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                try {
+                    DataBases c = new DataBases();
+                    ResultSet resultSet = c.statement.executeQuery("SELECT name, Username FROM newEmployer WHERE EmployerId = '" + EmployerIdTextField.getText() + "'");
                     if (resultSet.next()) {
                         NameTextField.setText(resultSet.getString("name"));
+                        UserNameTextField.setText(resultSet.getString("Username"));
                     } else {
-                        JOptionPane.showMessageDialog(null, "Meter number not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(null, "Employer Id not found.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -101,23 +119,21 @@ class SignUp extends JFrame implements ActionListener {
         EmployerId.setVisible(false);
         EmployerIdTextField.setVisible(false);
 
-        loginAsChoice.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                String user = loginAsChoice.getSelectedItem();
-                if (user.equals("Admin")) {
-                    MeterNumber.setVisible(false);
-                    MeterTextField.setVisible(false);
-                    NameTextField.setEditable(false);
-                    EmployerId.setVisible(true);
-                    EmployerIdTextField.setVisible(true);
-                } else {
-                    MeterNumber.setVisible(true);
-                    MeterTextField.setVisible(true);
-                    NameTextField.setEditable(false);
-                    EmployerId.setVisible(false);
-                    EmployerIdTextField.setVisible(false);
-                }
+        loginAsChoice.addItemListener(e -> {
+            String user = loginAsChoice.getSelectedItem();
+            if (user.equals("Admin")) {
+                MeterNumber.setVisible(false);
+                MeterTextField.setVisible(false);
+                EmployerId.setVisible(true);
+                EmployerIdTextField.setVisible(true);
+                NameTextField.setText("");
+                UserNameTextField.setText("");
+            } else {
+                MeterNumber.setVisible(true);
+                MeterTextField.setVisible(true);
+                EmployerId.setVisible(false);
+                EmployerIdTextField.setVisible(false);
+                NameTextField.setText("");
             }
         });
 
@@ -154,6 +170,11 @@ class SignUp extends JFrame implements ActionListener {
             String sMeterNumber = MeterTextField.getText();
             String sEmployerId = EmployerIdTextField.getText();
 
+            if (sPassword.length() < 6) {
+                JOptionPane.showMessageDialog(null, "Password must be at least 6 characters long", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             if (!sPassword.equals(sConfirmPassword)) {
                 JOptionPane.showMessageDialog(null, "Password and Confirm Password do not match", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -162,16 +183,35 @@ class SignUp extends JFrame implements ActionListener {
             try {
                 DataBases c = new DataBases();
                 String query;
+                 
+                String checkUsernameQuery = "SELECT COUNT(*) FROM signup WHERE Username = '" + sUserName + "'";
+                ResultSet rs = c.statement.executeQuery(checkUsernameQuery);
+                if (rs.next() && rs.getInt(1) > 0) {
+                    JOptionPane.showMessageDialog(this, "Username already exists", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+
                 if (sLoginAs.equals("Customer")) {
-                    query = "INSERT INTO Signup VALUES ('" + sMeterNumber + "', '" + sUserName + "', '" + sPassword + "', '" + sName + "', '" + sLoginAs + "')";
-                } else {
+                    query = "INSERT INTO Signup (meterNumber, userName, Password, Name, userType) VALUES ('" + sMeterNumber + "', '" + sUserName + "', '" + sPassword + "', '" + sName + "', '" + sLoginAs + "')";
+                }
+                else if (sLoginAs.equals("Admin")) 
+                {
+                    query = "INSERT INTO Signup (meterNumber, userName, Password, Name, userType, EmployerId) VALUES ('"+sEmployerId+"','" + sUserName + "', '" + sPassword + "', '" + sName + "', '" + sLoginAs + "', '" + sEmployerId +"')";
+                }
+                else
+                {
                     query = "update Signup set username = '"+sUserName+"', password = '"+sPassword+"', usertype = '"+sLoginAs+"' where meter_no = '"+sMeterNumber+"'";
                 }
                 c.statement.executeUpdate(query);
                 JOptionPane.showMessageDialog(null, "Account Created");
                 setVisible(false);
                 new Login();
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "SQL Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
         } else if (e.getSource() == back) {
