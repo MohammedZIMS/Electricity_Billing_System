@@ -20,7 +20,7 @@ public class DepositDetails extends JFrame implements ActionListener {
 
         JPanel searchPanel = new JPanel();
         searchPanel.setBackground(new Color(144, 238, 144));
-        searchPanel.setLayout(new GridLayout(1, 8, 10, 10));
+        searchPanel.setLayout(new GridLayout(1, 6, 10, 10));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         add(searchPanel, BorderLayout.NORTH);
 
@@ -53,11 +53,11 @@ public class DepositDetails extends JFrame implements ActionListener {
         populateStatusChoice();
         searchPanel.add(statusSearchChoice);
 
-        statusSearchButton = new JButton("Search by Status");
+        statusSearchButton = new JButton("Search");
         statusSearchButton.addActionListener(this);
         searchPanel.add(statusSearchButton);
 
-        shCleanButton = new JButton("Clear Search History");
+        shCleanButton = new JButton("Clear Search");
         shCleanButton.addActionListener(e -> tableModel.setRowCount(0));
         searchPanel.add(shCleanButton);
 
