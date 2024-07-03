@@ -174,6 +174,8 @@ public class CalculateBill extends JFrame implements ActionListener {
 
     private int calculateTotalBill(int unitsConsumed) {
         int totalBill = 0;
+        String industrialMeterType = "Industrial"; // Define the industrial meter type
+    
         try {
             DataBases c = new DataBases();
             ResultSet resultSet = c.statement.executeQuery("SELECT * FROM rates");
@@ -182,15 +184,68 @@ public class CalculateBill extends JFrame implements ActionListener {
                 int meterRent = Integer.parseInt(resultSet.getString("meter_rent"));
                 int serviceCharge = Integer.parseInt(resultSet.getString("service_charge"));
                 int fixedTax = Integer.parseInt(resultSet.getString("fixed_tax"));
-
-                totalBill = unitsConsumed * costPerUnit + meterRent + serviceCharge + fixedTax;
+    
+                // Get units consumed last month
+                int unitsConsumedLastMonth = getUnitsConsumedLastMonth(meterNoChoice.getSelectedItem(), monthChoice.getSelectedItem());
+    
+                // Calculate total units consumed this month
+                int totalUnitsConsumed = unitsConsumed - unitsConsumedLastMonth;
+    
+                // Calculate total bill based on total units consumed
+                totalBill = totalUnitsConsumed * costPerUnit + meterRent + serviceCharge + fixedTax;
+    
+                // Check if it's an Industrial meter to apply additional tax
+                ResultSet meterResultSet = c.statement.executeQuery("SELECT * FROM meter_info WHERE meter_no = '" + meterNoChoice.getSelectedItem() + "'");
+                if (meterResultSet.next()) {
+                    String meterType = meterResultSet.getString("meter_type");
+                    if (meterType.equals(industrialMeterType)) {
+                        // Apply 15% tax for Industrial meters
+                        double additionalTax = totalBill * 0.15;
+                        totalBill += additionalTax;
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return totalBill;
     }
-
+    
+    private int getUnitsConsumedLastMonth(String meterNo, String currentMonth) {
+        int unitsConsumedLastMonth = 0;
+        try {
+            DataBases c = new DataBases();
+            String previousMonth = getPreviousMonth(currentMonth); // Get the previous month
+            String query = String.format("SELECT unit_consumed FROM bill WHERE meter_no = '%s' AND month = '%s'", meterNo, previousMonth);
+            ResultSet resultSet = c.statement.executeQuery(query);
+            if (resultSet.next()) {
+                unitsConsumedLastMonth = Integer.parseInt(resultSet.getString("unit_consumed"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return unitsConsumedLastMonth;
+    }
+    
+    private String getPreviousMonth(String currentMonth) {
+        String[] months = {"January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"};
+    
+        int index = -1;
+        for (int i = 0; i < months.length; i++) {
+            if (months[i].equalsIgnoreCase(currentMonth)) {
+                index = i;
+                break;
+            }
+        }
+    
+        if (index == 0) {
+            return months[11]; // December is previous month of January
+        } else {
+            return months[index - 1];
+        }
+    }
+    
     public static void main(String[] args) {
         new CalculateBill();
     }
