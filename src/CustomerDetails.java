@@ -1,9 +1,8 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.sql.ResultSet;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.table.*;
 
 public class CustomerDetails extends JFrame implements ActionListener {
     Choice searchMeterNoChoice, searchNameChoice;
@@ -37,44 +36,22 @@ public class CustomerDetails extends JFrame implements ActionListener {
         searchNameChoice = new Choice();
         populateNameChoice();
         searchPanel.add(searchNameChoice);
-    /*
-        JScrollPane scrollPane = new JScrollPane(customerTable);
-        scrollPane.setBounds(0,100,700,500);
-        scrollPane.setBackground(Color.white);
-        add(scrollPane);
-    */
 
         searchButton = new JButton("Search");
         searchButton.addActionListener(this);
         searchPanel.add(searchButton);
 
         shCleanButton = new JButton("Clear Search History");
-        shCleanButton.addActionListener(e -> 
-        {
+        shCleanButton.addActionListener(e -> {
             tableModel.setRowCount(0);
-            try {
-                DataBases c = new DataBases();
-                String query = "SELECT * FROM new_Customer";
-                ResultSet resultSet = c.statement.executeQuery(query);
-                while (resultSet.next()) {
-                    String meterNo = resultSet.getString("meterNo");
-                    String name = resultSet.getString("name");
-                    String address = resultSet.getString("address");
-                    String city = resultSet.getString("city");
-                    String state = resultSet.getString("state");
-                    String email = resultSet.getString("email");
-                    String phoneNumber = resultSet.getString("phoneNumber");
-    
-                    tableModel.addRow(new Object[]{meterNo, name, address, city, state, email, phoneNumber});
-                }
-            } catch (Exception E) {
-                E.printStackTrace();
-            }
+            populateAllCustomers();
         });
         searchPanel.add(shCleanButton);
 
-        tableModel = new DefaultTableModel(new String[]{"Meter No", "Name", "Address", "City", "State", "Email", "Phone Number"}, 0);
+        tableModel = new DefaultTableModel(new String[]{"Meter No", "Name", "Address", "City", "State", "Email", "Phone Number", "Delete"}, 0);
         customerTable = new JTable(tableModel);
+        customerTable.getColumn("Delete").setCellRenderer(new ButtonRenderer());
+        customerTable.getColumn("Delete").setCellEditor(new ButtonEditor(new JCheckBox()));
         add(new JScrollPane(customerTable), BorderLayout.CENTER);
 
         JPanel printPanel = new JPanel();
@@ -132,11 +109,26 @@ public class CustomerDetails extends JFrame implements ActionListener {
                 String email = resultSet.getString("email");
                 String phoneNumber = resultSet.getString("phoneNumber");
 
-                tableModel.addRow(new Object[]{meterNo, name, address, city, state, email, phoneNumber});
+                tableModel.addRow(new Object[]{meterNo, name, address, city, state, email, phoneNumber, "Delete"});
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String getUsernameFromSignup(String meterNo) {
+        String username = "";
+        try {
+            DataBases c = new DataBases();
+            String query = "SELECT userName FROM Signup WHERE meterNo = '" + meterNo + "'";
+            ResultSet resultSet = c.statement.executeQuery(query);
+            if (resultSet.next()) {
+                username = resultSet.getString("userName");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return username;
     }
 
     @Override
@@ -182,13 +174,14 @@ public class CustomerDetails extends JFrame implements ActionListener {
             while (resultSet.next()) {
                 String meterNoVal = resultSet.getString("meterNo");
                 String nameVal = resultSet.getString("name");
+                String userVal = getUsernameFromSignup(meterNoVal); // Get the username from the Signup table
                 String addressVal = resultSet.getString("address");
                 String cityVal = resultSet.getString("city");
                 String stateVal = resultSet.getString("state");
                 String emailVal = resultSet.getString("email");
                 String phoneNumberVal = resultSet.getString("phoneNumber");
 
-                tableModel.addRow(new Object[]{meterNoVal, nameVal, addressVal, cityVal, stateVal, emailVal, phoneNumberVal});
+                tableModel.addRow(new Object[]{meterNoVal, nameVal, addressVal, cityVal, stateVal, emailVal, phoneNumberVal, "Delete"});
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -197,5 +190,73 @@ public class CustomerDetails extends JFrame implements ActionListener {
 
     public static void main(String[] args) {
         new CustomerDetails();
+    }
+
+    // Custom renderer for the delete button
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    // Custom editor for the delete button
+    class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+        private String label;
+        private boolean isPushed;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            isPushed = true;
+            return button;
+        }
+
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                int row = customerTable.getSelectedRow();
+                String meterNo = tableModel.getValueAt(row, 0).toString();
+                deleteCustomer(meterNo);
+                tableModel.removeRow(row);
+            }
+            isPushed = false;
+            return new String(label);
+        }
+
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        protected void fireEditingStopped() {
+            super.fireEditingStopped();
+        }
+
+        private void deleteCustomer(String meterNo) {
+            try {
+                DataBases c = new DataBases();
+                String query = "DELETE FROM new_Customer WHERE meterNo = '" + meterNo + "'";
+                c.statement.executeUpdate(query);
+                JOptionPane.showMessageDialog(null, "Customer with Meter No: " + meterNo + " deleted successfully.");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
