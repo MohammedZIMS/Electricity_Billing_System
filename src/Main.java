@@ -1,11 +1,12 @@
 import javax.swing.*;
 import java.awt.*;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 class Main extends JFrame {
     String Accounttype;
     String meterNum;
-    JLabel nameLabel, nameTextLabel, meterNoLabel, meterNoTextLabel, emailLabel, emailTextLabel, phoneNumberLabel, phoneNumberTextLabel, addressLabel, addressTextLabel;
+    JLabel nameLabel, nameTextLabel, meterNoLabel, meterNoTextLabel, usernamLabel, usernameTextLabel, emailLabel, emailTextLabel, phoneNumberLabel, phoneNumberTextLabel, cityJLabel, cityTextLabel, stateLabel, stateTextLebal, addressLabel, addressTextLabel;
     JButton backButton, updateProfileButton;
     JPanel profilePanel;
 
@@ -26,46 +27,59 @@ class Main extends JFrame {
         layeredPane.add(EbsLabel, JLayeredPane.DEFAULT_LAYER);
 
         JButton newCustomerButton = new JButton("New Customer");
-        newCustomerButton.setBounds(70, 200, 150, 30);
+        newCustomerButton.setBounds(70, 150, 150, 60);
         newCustomerButton.addActionListener(e -> new NewCustomer());
         layeredPane.add(newCustomerButton, JLayeredPane.PALETTE_LAYER);
 
-        JButton customerDetailsButton = new JButton("Customer Details");
-        customerDetailsButton.setBounds(250, 200, 150, 30);
-        customerDetailsButton.addActionListener(e -> new CustomerDetails());
-        layeredPane.add(customerDetailsButton, JLayeredPane.PALETTE_LAYER);
-
-        JButton depositDetailsButton = new JButton("Deposit Details");
-        depositDetailsButton.setBounds(430, 150, 150, 30);
-        depositDetailsButton.addActionListener(e -> new DepositDetails());
-        layeredPane.add(depositDetailsButton, JLayeredPane.PALETTE_LAYER);
-
-        JButton calculateBillButton = new JButton("Calculate Bill");
-        calculateBillButton.setBounds(430, 200, 150, 30);
-        calculateBillButton.addActionListener(e -> new CalculateBill());
-        layeredPane.add(calculateBillButton, JLayeredPane.PALETTE_LAYER);
-
         JButton upInfoButton = new JButton("Update Information");
-        upInfoButton.setBounds(250, 150, 150, 30);
+        upInfoButton.setBounds(250, 150, 150, 60);
         upInfoButton.addActionListener(e -> new UpdateInfo());
         layeredPane.add(upInfoButton, JLayeredPane.PALETTE_LAYER);
 
+        JButton newEmployerButton = new JButton("New Employer");
+        newEmployerButton.setBounds(430, 150, 150, 60);
+        newEmployerButton.addActionListener(e -> new NewEmployer());
+        layeredPane.add(newEmployerButton, JLayeredPane.PALETTE_LAYER);
+
+
+        JButton calculateBillButton = new JButton("Calculate Bill");
+        calculateBillButton.setBounds(610, 150, 150, 60);
+        calculateBillButton.addActionListener(e -> new CalculateBill());
+        layeredPane.add(calculateBillButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton customerDetailsButton = new JButton("Customer Details");
+        customerDetailsButton.setBounds(70, 250, 150, 60);
+        customerDetailsButton.addActionListener(e -> new CustomerDetails());
+        layeredPane.add(customerDetailsButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton employerDetailsButton = new JButton("Employee Details");
+        employerDetailsButton.setBounds(430, 250, 150, 60);
+        employerDetailsButton.addActionListener(e -> new EmployerDetails());
+        layeredPane.add(employerDetailsButton, JLayeredPane.PALETTE_LAYER);
+
+        JButton depositDetailsButton = new JButton("Deposit Details");
+        depositDetailsButton.setBounds(610, 250, 150, 60);
+        depositDetailsButton.addActionListener(e -> new DepositDetails());
+        layeredPane.add(depositDetailsButton, JLayeredPane.PALETTE_LAYER);
+
         JButton viewInfoButton = new JButton("View Information");
-        viewInfoButton.setBounds(70, 150, 150, 30);
+        viewInfoButton.setBounds(250, 250, 150, 60);
         viewInfoButton.addActionListener(e -> new ViewInfo());
         layeredPane.add(viewInfoButton, JLayeredPane.PALETTE_LAYER);
 
         JButton payBillButton = new JButton("Pay Bill");
-        payBillButton.setBounds(70, 200, 150, 30);
+        payBillButton.setBounds(70, 250, 150, 60);
+        payBillButton.addActionListener(e -> new PayBill(meterNum));
         layeredPane.add(payBillButton, JLayeredPane.PALETTE_LAYER);
 
         JButton billDetailsButton = new JButton("Bill Details");
-        billDetailsButton.setBounds(70, 250, 150, 30);
-        billDetailsButton.addActionListener(e -> new BillDetails(Accounttype));
+        billDetailsButton.setBounds(70, 350, 150, 60);
+        billDetailsButton.addActionListener(e -> new BillDetails(""));
         layeredPane.add(billDetailsButton, JLayeredPane.PALETTE_LAYER);
 
         JButton generateBillButton = new JButton("Generate Bill");
-        generateBillButton.setBounds(70, 300, 150, 30);
+        generateBillButton.setBounds(250, 350, 150, 60);
+        generateBillButton.addActionListener(e -> {new GenerateBill(meterNum);});
         layeredPane.add(generateBillButton, JLayeredPane.PALETTE_LAYER);
 
         add(layeredPane);
@@ -105,7 +119,7 @@ class Main extends JFrame {
 
         JMenuItem calculateBill = new JMenuItem("Calculate Bill ");
         calculateBill.setFont(new Font("monospaced", Font.PLAIN, 14));
-        ImageIcon calculateBillIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/calculatorbills.png"));
+        ImageIcon calculateBillIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/calculator.png"));
         Image calculateBillImg = calculateBillIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         calculateBill.setIcon(new ImageIcon(calculateBillImg));
         calculateBill.addActionListener(e -> new CalculateBill());
@@ -121,13 +135,20 @@ class Main extends JFrame {
         ImageIcon upInfoIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/refresh.png"));
         Image upInfoImg = upInfoIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         upInfo.setIcon(new ImageIcon(upInfoImg));
-        info.add(upInfo);
+        upInfo.addActionListener(e ->
+        {
+            new UpdateInfo();
+        });
 
         JMenuItem viewInfo = new JMenuItem("View Information");
         viewInfo.setFont(new Font("Courier New", Font.PLAIN, 14));
         ImageIcon viewInfoIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/information.png"));
         Image viewInfoImg = viewInfoIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         viewInfo.setIcon(new ImageIcon(viewInfoImg));
+        viewInfo.addActionListener(e ->
+        {
+            new ViewInfo();
+        });
         info.add(viewInfo);
 
         menuBar.add(Box.createHorizontalStrut(20));
@@ -153,6 +174,9 @@ class Main extends JFrame {
         ImageIcon genBillIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/bill.png"));
         Image genBillImg = genBillIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         genBill.setIcon(new ImageIcon(genBillImg));
+        genBill.addActionListener(e -> {
+            new GenerateBill(meterNum);
+        });
         bill.add(genBill);
 
         JMenuItem payBill = new JMenuItem("Pay Bill");
@@ -160,6 +184,10 @@ class Main extends JFrame {
         ImageIcon payBillIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/pay.png"));
         Image payBillImg = payBillIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         payBill.setIcon(new ImageIcon(payBillImg));
+        payBill.addActionListener(e -> 
+        {
+            new PayBill(meterNum);
+        });
         bill.add(payBill);
 
         JMenuItem billDetails = new JMenuItem("Bill Details");
@@ -167,7 +195,7 @@ class Main extends JFrame {
         ImageIcon billDetailsImg = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/detail.png"));
         Image billDetailsImage = billDetailsImg.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         billDetails.setIcon(new ImageIcon(billDetailsImage));
-        billDetails.addActionListener(e -> new BillDetails(Accounttype));
+        billDetails.addActionListener(e -> new BillDetails(""));
         bill.add(billDetails);
 
         menuBar.add(Box.createHorizontalStrut(20));
@@ -177,9 +205,17 @@ class Main extends JFrame {
 
         JMenuItem calculator = new JMenuItem("Calculator");
         calculator.setFont(new Font("Courier New", Font.PLAIN, 14));
-        ImageIcon calculatorIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/calculator.png"));
+        ImageIcon calculatorIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/calculatorbills.png"));
         Image calculatorImg = calculatorIcon.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         calculator.setIcon(new ImageIcon(calculatorImg));
+        calculator.addActionListener(e ->
+        {
+            try{
+                Runtime.getRuntime().exec("calc.exe");
+            }catch (Exception E){
+                E.printStackTrace();
+            }
+        });
         utility.add(calculator);
 
         JMenuItem notepad = new JMenuItem("Notepad");
@@ -187,6 +223,14 @@ class Main extends JFrame {
         ImageIcon notepadImg = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/notepad.png"));
         Image notepadImage = notepadImg.getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT);
         notepad.setIcon(new ImageIcon(notepadImage));
+        notepad.addActionListener(e -> 
+        {
+            try{
+                Runtime.getRuntime().exec("notepad.exe");
+            }catch (Exception E){
+                E.printStackTrace();
+            }
+        });
         utility.add(notepad);
 
         menuBar.add(Box.createHorizontalStrut(20));
@@ -209,12 +253,18 @@ class Main extends JFrame {
 
         if (Accounttype.equals("Admin")) {
             menuBar.add(menu);
+            info.add(upInfo);
+            menuBar.add(info);
             payBillButton.setVisible(false);
             generateBillButton.setVisible(false);
             billDetailsButton.setVisible(false);
-        } else {
+        } 
+        else 
+        {
             menuBar.add(bill);
             menuBar.add(info);
+            newEmployerButton.setVisible(false);
+            employerDetailsButton.setVisible(false);
             newCustomerButton.setVisible(false);
             calculateBillButton.setVisible(false);
             depositDetailsButton.setVisible(false);
@@ -235,16 +285,18 @@ class Main extends JFrame {
         profileHeading.setFont(new Font("Times New Roman", Font.BOLD, 24));
         profilePanel.add(profileHeading, BorderLayout.NORTH);
 
+
+
         ImageIcon profileIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/Profile0.png"));
         Image profileImage = profileIcon.getImage().getScaledInstance(150, 100, Image.SCALE_DEFAULT);
         JLabel profileLabel = new JLabel(new ImageIcon(profileImage));
-        profileLabel.setBounds(170, 80, 150, 100);
+        profileLabel.setBounds(90, 80, 150, 100);
         profilePanel.add(profileLabel);
         profilePanel.add(profileLabel, BorderLayout.CENTER);
 
         JPanel profileInfoPanel = new JPanel();
         profileInfoPanel.setBackground(new Color(252, 186, 3));
-        profileInfoPanel.setPreferredSize(new Dimension((int) (getWidth() + 500), getHeight() - 550));
+        profileInfoPanel.setPreferredSize(new Dimension((int) (getWidth() + 350), getHeight() - 550));
         profileInfoPanel.setLayout(null);
 
         nameLabel = new JLabel("Name:");
@@ -263,29 +315,57 @@ class Main extends JFrame {
         meterNoTextLabel.setBounds(120, 210, 150, 16);
         profileInfoPanel.add(meterNoTextLabel);
 
+        usernamLabel = new JLabel("Username:");
+        usernamLabel.setBounds(10, 240, 100, 16);
+        profileInfoPanel.add(usernamLabel);
+
+        usernameTextLabel = new JLabel("");
+        usernameTextLabel.setBounds(120, 240, 150, 16);
+        profileInfoPanel.add(usernameTextLabel);
+
         emailLabel = new JLabel("Email:");
-        emailLabel.setBounds(10, 240, 100, 16);
+        emailLabel.setBounds(10, 270, 100, 16);
         profileInfoPanel.add(emailLabel);
 
         emailTextLabel = new JLabel("");
-        emailTextLabel.setBounds(120, 240, 150, 16);
+        emailTextLabel.setBounds(120, 270, 150, 16);
         profileInfoPanel.add(emailTextLabel);
 
         phoneNumberLabel = new JLabel("Phone Number:");
-        phoneNumberLabel.setBounds(10, 270, 100, 16);
+        phoneNumberLabel.setBounds(10, 300, 100, 16);
         profileInfoPanel.add(phoneNumberLabel);
 
         phoneNumberTextLabel = new JLabel("");
-        phoneNumberTextLabel.setBounds(120, 270, 150, 16);
+        phoneNumberTextLabel.setBounds(120, 300, 150, 16);
         profileInfoPanel.add(phoneNumberTextLabel);
 
+        cityJLabel = new JLabel("City:");
+        cityJLabel.setBounds(10, 330, 100, 16);
+        profileInfoPanel.add(cityJLabel);
+
+        cityTextLabel = new JLabel("");
+        cityTextLabel.setBounds(120, 330, 150, 16);
+        profileInfoPanel.add(cityTextLabel);
+
+        stateLabel = new JLabel("State:");
+        stateLabel.setBounds(10, 360, 100, 16);
+        profileInfoPanel.add(stateLabel);
+
+        stateTextLebal = new JLabel("");
+        stateTextLebal.setBounds(120, 360, 150, 16);
+        profileInfoPanel.add(stateTextLebal);
+
         addressLabel = new JLabel("Address:");
-        addressLabel.setBounds(10, 300, 100, 16);
+        addressLabel.setBounds(10, 390, 100, 16);
         profileInfoPanel.add(addressLabel);
 
         addressTextLabel = new JLabel("");
-        addressTextLabel.setBounds(120, 300, 150, 16);
+        addressTextLabel.setBounds(120, 390, 150, 16);
         profileInfoPanel.add(addressTextLabel);
+
+        cityJLabel = new JLabel("City:");
+        cityJLabel.setBounds(EXIT_ON_CLOSE, ABORT, WIDTH, HEIGHT);
+        profileInfoPanel.add(cityJLabel);
 
         profilePanel.add(profileInfoPanel, BorderLayout.CENTER);
 
@@ -298,6 +378,11 @@ class Main extends JFrame {
         profileButtonPanel.add(backButton);
 
         updateProfileButton = new JButton("Update Profile");
+        updateProfileButton.addActionListener(e ->
+        {
+            profilePanel.setVisible(false);
+            new UpdateProfile(Accounttype, meterNum);
+        });
         profileButtonPanel.add(updateProfileButton);
 
         profilePanel.add(profileButtonPanel, BorderLayout.SOUTH);
@@ -313,21 +398,62 @@ class Main extends JFrame {
     }
 
     private void loadProfileData() {
-        try {
-            DataBases c = new DataBases();
-            ResultSet resultSet = c.statement.executeQuery("select * from new_customer where meterNo = '" + meterNum + "'");
+    DataBases c = new DataBases();
+    ResultSet resultSet = null;
+    ResultSet resultSet2 = null;
+    PreparedStatement pstmt = null;
+    PreparedStatement pstmt2 = null;
+
+    try {
+        if (Accounttype.equals("Customer")) {
+            String query1 = "SELECT * FROM new_customer WHERE meterNo = ?";
+            pstmt = c.connection.prepareStatement(query1);
+            pstmt.setString(1, meterNum);
+            resultSet = pstmt.executeQuery();
 
             if (resultSet.next()) {
                 nameTextLabel.setText(resultSet.getString("name"));
                 meterNoTextLabel.setText(resultSet.getString("meterNo"));
                 emailTextLabel.setText(resultSet.getString("email"));
                 phoneNumberTextLabel.setText(resultSet.getString("phoneNumber"));
+                cityTextLabel.setText(resultSet.getString("city"));
+                stateTextLebal.setText(resultSet.getString("state"));
+                addressTextLabel.setText(resultSet.getString("address"));
+                usernamLabel.setVisible(false);
+
+            }
+        } else if (Accounttype.equals("Admin")) {
+            String query = "SELECT * FROM newEmployer WHERE EmployerId = ?";
+            pstmt = c.connection.prepareStatement(query);
+            pstmt.setString(1, meterNum);
+            resultSet = pstmt.executeQuery();
+
+            if (resultSet.next()) {
+                nameTextLabel.setText(resultSet.getString("name"));
+                meterNoTextLabel.setText(resultSet.getString("EmployerId"));
+                usernameTextLabel.setText(resultSet.getString("userName"));
+                emailTextLabel.setText(resultSet.getString("email"));
+                phoneNumberTextLabel.setText(resultSet.getString("phoneNumber"));
+                cityTextLabel.setText(resultSet.getString("city"));
+                stateTextLebal.setText(resultSet.getString("state"));
                 addressTextLabel.setText(resultSet.getString("address"));
             }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(null, "Error loading profile data.", "Error", JOptionPane.ERROR_MESSAGE);
+    } finally {
+        try {
+            if (resultSet != null) resultSet.close();
+            if (resultSet2 != null) resultSet2.close();
+            if (pstmt != null) pstmt.close();
+            if (pstmt2 != null) pstmt2.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+}
+
 
     private void showProfile() {
         profilePanel.setVisible(true);
@@ -335,6 +461,6 @@ class Main extends JFrame {
 
     public static void main(String[] args) 
     {
-        SwingUtilities.invokeLater(() -> new Main("Customer", "241916"));
+        new Main("Admin", "372899");
     }
 }
