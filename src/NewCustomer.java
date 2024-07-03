@@ -1,15 +1,14 @@
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.Random;
 import javax.swing.*;
 
-class NewCustomer extends JFrame 
-{
-    JLabel newCustomerLabel, MeterNoLabel, AddressLabel, CityLabel, StateLabel, EmailLabel, PhonNumberLabel;
-    JTextField newCustomerTextField, MeterNoTextField, AddressTextField, CityTextField, StateTextField, EmailTextField, PhonNumberTextField;
+class NewCustomer extends JFrame {
+    JLabel newCustomerLabel, MeterNoLabel, AddressLabel, CityLabel, StateLabel, EmailLabel, PhoneNumberLabel;
+    JTextField newCustomerTextField, MeterNoTextField, AddressTextField, CityTextField, StateTextField, EmailTextField, PhoneNumberTextField;
     JButton CancelButton, NextButton;
 
-    NewCustomer() 
-    {
+    NewCustomer() {
         JPanel newCustomerPanel = new JPanel();
         newCustomerPanel.setBackground(new Color(252, 186, 3));
         newCustomerPanel.setLayout(null);
@@ -35,9 +34,7 @@ class NewCustomer extends JFrame
         MeterNoTextField.setBounds(180, 110, 150, 20);
         newCustomerPanel.add(MeterNoTextField);
 
-        Random ran = new Random();
-        long number = ran.nextLong() % 1000000;
-        MeterNoTextField.setText("" + Math.abs(number));
+        generateMeterNo();
         MeterNoTextField.setEditable(false);
 
         AddressLabel = new JLabel("Address: ");
@@ -72,60 +69,31 @@ class NewCustomer extends JFrame
         EmailTextField.setBounds(180, 260, 150, 20);
         newCustomerPanel.add(EmailTextField);
 
-        PhonNumberLabel = new JLabel("Phone Number: ");
-        PhonNumberLabel.setBounds(50, 300, 120, 20);
-        newCustomerPanel.add(PhonNumberLabel);
+        PhoneNumberLabel = new JLabel("Phone Number: ");
+        PhoneNumberLabel.setBounds(50, 300, 120, 20);
+        newCustomerPanel.add(PhoneNumberLabel);
 
-        PhonNumberTextField = new JTextField();
-        PhonNumberTextField.setBounds(180, 300, 150, 20);
-        newCustomerPanel.add(PhonNumberTextField);
+        PhoneNumberTextField = new JTextField();
+        PhoneNumberTextField.setBounds(180, 300, 150, 20);
+        newCustomerPanel.add(PhoneNumberTextField);
 
         NextButton = new JButton("Next");
         NextButton.setBounds(100, 400, 100, 30);
         NextButton.setBackground(Color.BLACK);
         NextButton.setForeground(Color.WHITE);
-        NextButton.addActionListener(e -> 
-        {
-            String name = newCustomerTextField.getText();
-            String meterNo = MeterNoTextField.getText();
-            String address = AddressTextField.getText();
-            String city = CityTextField.getText();
-            String state = StateTextField.getText();
-            String email = EmailTextField.getText();
-            String phoneNumber = PhonNumberTextField.getText();
-
-            String queryCustomer = "insert into new_Customer values('"+name+"','"+meterNo+"','"+address+"','"+city+"','"+state+"','"+email+"','"+phoneNumber+"')";
-            String querySignup = "insert into signup values('"+meterNo+"','','','"+name+"','')";
-
-            try{
-                DataBases c = new DataBases();
-                c.statement.executeUpdate(queryCustomer);
-                c.statement.executeUpdate(querySignup);
-
-                JOptionPane.showMessageDialog(this, "Customer details added successfully");
-                JOptionPane.showMessageDialog(this, "Customer added successfully!");
-                setVisible(false);
-                new Meterinfo(meterNo);
-            }catch (Exception E){
-                E.printStackTrace();
-            }
-        });
+        NextButton.addActionListener(e -> saveCustomerDetails());
         newCustomerPanel.add(NextButton);
 
         CancelButton = new JButton("Cancel");
         CancelButton.setBounds(240, 400, 100, 30);
         CancelButton.setBackground(Color.BLACK);
         CancelButton.setForeground(Color.WHITE);
-        CancelButton.addActionListener(e -> 
-        {
-            this.dispose();
-        });
+        CancelButton.addActionListener(e -> dispose());
         newCustomerPanel.add(CancelButton);
 
         setSize(700, 500);
         setLocation(600, 200);
         setResizable(false);
-
         add(newCustomerPanel, BorderLayout.CENTER);
 
         ImageIcon NewCustomerIcon = new ImageIcon(ClassLoader.getSystemResource("ImagePariseba/customer4-removebg-preview.png"));
@@ -139,8 +107,61 @@ class NewCustomer extends JFrame
         setVisible(true);
     }
 
-    public static void main(String[] args) 
-    {
-        new NewCustomer();
+    private void generateMeterNo() {
+        Random ran = new Random();
+        long number = Math.abs(ran.nextLong() % 1000000);
+        MeterNoTextField.setText(String.valueOf(number));
+    }
+
+    private void saveCustomerDetails() {
+        String name = newCustomerTextField.getText();
+        String meterNo = MeterNoTextField.getText();
+        String address = AddressTextField.getText();
+        String city = CityTextField.getText();
+        String state = StateTextField.getText();
+        String email = EmailTextField.getText();
+        String phoneNumber = PhoneNumberTextField.getText();
+
+        if (!validateEmail(email) || !validatePhoneNumber(phoneNumber)) {
+            return;
+        }
+
+        String queryCustomer = "INSERT INTO new_Customer (name, meterNo, address, city, state, email, phoneNumber) VALUES ('" 
+                                + name + "','" + meterNo + "','" + address + "','" + city + "','" + state + "','" + email + "','" + phoneNumber + "')";
+        String querySignup = "INSERT INTO signup (meterNumber, userName, password, name, userType) VALUES ('" 
+                             + meterNo + "','','','" + name + "','')";
+
+        try {
+            DataBases c = new DataBases();
+            c.statement.executeUpdate(queryCustomer);
+            c.statement.executeUpdate(querySignup);
+
+            JOptionPane.showMessageDialog(this, "Customer details added successfully");
+            setVisible(false);
+            new Meterinfo(meterNo);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
+    private boolean validateEmail(String email) {
+        if (!email.contains("@") || !email.endsWith(".com")) {
+            JOptionPane.showMessageDialog(this, "Invalid email format", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean validatePhoneNumber(String phoneNumber) {
+        if (phoneNumber.length() != 11 || !phoneNumber.startsWith("01") || "356789".indexOf(phoneNumber.charAt(2)) == -1) {
+            JOptionPane.showMessageDialog(this, "Invalid phone number format", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(NewCustomer::new);
     }
 }
